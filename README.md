@@ -3,6 +3,7 @@
 
 ### Assignment 1
 #### 제목: Dao를 이전 스타일로 작성하여 테스트 하기
+#### 기한: 2014년 9월 17일 (수요일) 23시 59분 
 - 본 프로젝트를 각자 자신의 github 내로 fork 하여 가져가기
 - 자신의 로컬 하드로 프로젝트 내려받기 
 - STS에서 해당 프로젝트를 import 하기 (Exsiting Maven Project)
@@ -30,5 +31,4 @@
   - 게시물 제목 및 내용: 웹서비스컴퓨팅및실습-1차-홍길동-2010111222
     - 반드시 내용에 본인 코드가 올려져 있는 github repository url을 기재할 것
   - 질문은 jyjin989@koreatech.ac.kr로 메일을 보내면서 yhhan@koreatech.ac.kr를 CC 할 것 
-- 제출 일시
-  - 2014년 9월 17일 (수요일) 23시 59분 
+
