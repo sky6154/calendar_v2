@@ -13,7 +13,7 @@
   - JdbcCalendarUserDao.java
   - JdbcEventDao.java
   - [주의 1] 각 클래스 마다 deleteAll() 메소드가 추가되었고 구현 필요
-  - [주의 2] EventDao에 있던 이전 findForUser(int userId)는 findForOwner(int ownerUserId)로 메소드 이름과 인자 이름이 변경되었음, 역시 구현 필요
+  - [주의 2] EventDao 및 JdbcEventDao에 있던 이전 findForUser(int userId)는 findForOwner(int ownerUserId)로 메소드 이름과 인자 이름이 변경되었음, 역시 구현 필요
 - 요구 사항 2 - 다음 테스트 클래스 구현하기 
   - 주석으로 설명해 놓은 7가지 사항 코딩하기 
   - [주의 1] @Before 1개 + @Test 6개
