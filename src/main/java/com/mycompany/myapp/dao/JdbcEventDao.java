@@ -1,51 +1,164 @@
 package com.mycompany.myapp.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Repository;
 
+import com.mycompany.myapp.domain.CalendarUser;
 import com.mycompany.myapp.domain.Event;
+
 
 @Repository
 public class JdbcEventDao implements EventDao {
-    private DataSource dataSource;
+	private DataSource dataSource;
 
-    // --- constructors ---
-    public JdbcEventDao() {
-    }
+	// --- constructors ---
+	public JdbcEventDao() { 
+	}
 
 	public void setDataSource(DataSource dataSource){
 		this.dataSource = dataSource;
 	}
 
-    // --- EventService ---
-    @Override
-    public Event getEvent(int eventId) {
-        return null;
-    }
+	// --- EventService ---
+	@Override
+	public Event getEvent(int eventId) {
+		ApplicationContext context = new GenericXmlApplicationContext("com/mycompany/myapp/applicationContext.xml");;
+		CalendarUserDao calendarUserDao = context.getBean("calendarUserDao", JdbcCalendarUserDao.class);
 
-    @Override
-    public int createEvent(final Event event) {
-        return 0;
-    }
+		Event event = new Event();
 
-    @Override
-    public List<Event> findForUser(int userId) {
-        return null;
-    }
+		Connection c;
+		try {
+			c = dataSource.getConnection();
 
-    @Override
-    public List<Event> getEvents() {
-        return null;
-    }
 
-    /*
+			PreparedStatement ps = c.prepareStatement( "select * from events where id = ?");
+			ps.setString(1, Integer.toString(eventId));
+
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+
+			event.setId(Integer.parseInt(rs.getString("id")));
+			 
+			Calendar when = Calendar.getInstance();
+			when.setTimeInMillis(rs.getTimestamp("when").getTime());
+			event.setWhen(when);
+			event.setSummary(rs.getString("summary"));
+			event.setDescription(rs.getString("description"));
+			CalendarUser owner = calendarUserDao.getUser(rs.getInt("owner"));
+			event.setOwner(owner);
+			CalendarUser attendee = calendarUserDao.getUser(rs.getInt("attendee"));
+			event.setAttendee(attendee);
+
+			rs.close();
+			ps.close();
+			c.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return event;
+	}
+
+	@Override
+	public int createEvent(final Event event) {
+		Connection c;
+		int generatedId = 0; 
+		try {
+			c = dataSource.getConnection();
+
+			PreparedStatement ps = c.prepareStatement( "insert into events(`when`, summary, description, owner, attendee) values(?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+			
+			Timestamp timestamp = new Timestamp(event.getWhen().getTimeInMillis()); 
+			
+			ps.setTimestamp(1, timestamp);
+			ps.setString(2, event.getSummary());
+			ps.setString(3, event.getDescription());
+			ps.setInt(4, event.getOwner().getId());
+			ps.setInt(5, event.getAttendee().getId());
+
+			ps.executeUpdate();
+
+			ResultSet rs = ps.getGeneratedKeys();
+
+			if(rs.next())
+			{
+				generatedId = rs.getInt(1);
+			}
+			rs.close();
+			ps.close();
+			c.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return generatedId;
+	}
+
+	@Override
+	public List<Event> findForUser(int userId) {
+		return null;
+	}
+
+	@Override
+	public List<Event> getEvents(){
+		ApplicationContext context = new GenericXmlApplicationContext("com/mycompany/myapp/applicationContext.xml");;
+
+		CalendarUserDao calendarUserDao = context.getBean("calendarUserDao", JdbcCalendarUserDao.class);
+
+		List<Event> list = new ArrayList<Event>();
+
+		Connection c;
+		try {
+			c = dataSource.getConnection();
+
+
+			PreparedStatement ps = c.prepareStatement( "select * from events");
+
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+			{
+				Event event = new Event();
+				event.setId(Integer.parseInt(rs.getString("id")));
+				Calendar when = Calendar.getInstance();
+				when.setTimeInMillis(rs.getTimestamp("when").getTime());
+				event.setWhen(when);
+				event.setSummary(rs.getString("summary"));
+				event.setDescription(rs.getString("description"));
+				CalendarUser owner = calendarUserDao.getUser(rs.getInt("owner"));
+				event.setOwner(owner);
+				CalendarUser attendee = calendarUserDao.getUser(rs.getInt("attendee"));
+				event.setAttendee(attendee);
+
+				list.add(event);
+			}
+			rs.close();
+			ps.close();
+			c.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	/*
     private static final String EVENT_QUERY = "select e.id, e.summary, e.description, e.when, " +
             "owner.id as owner_id, owner.email as owner_email, owner.password as owner_password, owner.name as owner_name, " +
             "attendee.id as attendee_id, attendee.email as attendee_email, attendee.password as attendee_password, attendee.name as attendee_name " +
             "from events as e, calendar_users as owner, calendar_users as attendee " +
             "where e.owner = owner.id and e.attendee = attendee.id";
-     */
+	 */
 }
