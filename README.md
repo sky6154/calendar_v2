@@ -8,7 +8,7 @@
 - calendar-dev 오른쪽 클릭 > Maven > Update Project 실행하여 라이브러리 재정리하기
   - [참고] 새로 추가된 Maven 라이브러리
   - ```
-    <dependency>
+        <dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-test</artifactId>
 		<version>${spring.version}</version>
