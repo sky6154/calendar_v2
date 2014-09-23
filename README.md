@@ -7,7 +7,7 @@
 - calendar-dev를 pull 하여 최신 버전으로 업데이트하기
 - calendar-dev 오른쪽 클릭 > Maven > Update Project 실행하여 라이브러리 재정리하기
   - [참고] 새로 추가된 Maven 라이브러리
-  - <pre>
+  - '''
     <dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-test</artifactId>
@@ -20,7 +20,7 @@
 		<version>${junit.version}</version>
 		<scope>test</scope>
 	</dependency>
-    </pre> 
+    ''' 
 - 요구 사항 1 - 다음 두 개의 Dao 클래스를 JdbcTemplate를 활용하여 리펙토링하기
   - JdbcCalendarUserDao.java
   - JdbcEventDao.java
