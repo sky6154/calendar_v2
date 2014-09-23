@@ -128,4 +128,9 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 		}
 		return generatedId;
 	}
+	
+	@Override
+	public void deleteAll() {
+		// Assignment 2
+	}
 }

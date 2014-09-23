@@ -6,11 +6,13 @@ import com.mycompany.myapp.domain.Event;
 
 public interface EventDao {
 
-    Event getEvent(int eventId);
+    public Event getEvent(int eventId);
 
-    int createEvent(Event event);
+    public int createEvent(Event event);
 
-    List<Event> findForUser(int userId);
+    public List<Event> findForOwner(int ownerUserId);
 
-    List<Event> getEvents();
+    public List<Event> getEvents();
+    
+    public void deleteAll();
 }

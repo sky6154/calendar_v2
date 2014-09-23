@@ -108,7 +108,8 @@ public class JdbcEventDao implements EventDao {
 	}
 
 	@Override
-	public List<Event> findForUser(int userId) {
+	public List<Event> findForOwner(int ownerUserId) {
+		// Assignment 2
 		return null;
 	}
 
@@ -153,12 +154,9 @@ public class JdbcEventDao implements EventDao {
 		}
 		return list;
 	}
-
-	/*
-    private static final String EVENT_QUERY = "select e.id, e.summary, e.description, e.when, " +
-            "owner.id as owner_id, owner.email as owner_email, owner.password as owner_password, owner.name as owner_name, " +
-            "attendee.id as attendee_id, attendee.email as attendee_email, attendee.password as attendee_password, attendee.name as attendee_name " +
-            "from events as e, calendar_users as owner, calendar_users as attendee " +
-            "where e.owner = owner.id and e.attendee = attendee.id";
-	 */
+	
+	@Override
+	public void deleteAll() {
+		// Assignment 2
+	}
 }
