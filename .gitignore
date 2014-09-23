@@ -11,7 +11,6 @@ Thumbs.db
 .springBeans
 .externalToolBuilders
 .project
-.~lock.jms_mail.xls#
 .idea/
 jms.iml
 /src/main/resources/dev/config.properties
