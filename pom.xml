@@ -55,12 +55,6 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.3.163</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jsp-api</artifactId>
       <version>2.0</version>
@@ -215,9 +209,22 @@
       <version>${spring.version}</version>
       <scope>compile</scope>
     </dependency>
+  	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-test</artifactId>
+		<version>${spring.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>${junit.version}</version>
+		<scope>test</scope>
+	</dependency>
   </dependencies>
   <properties>
     <spring.version>3.1.0.RELEASE</spring.version>
+    <junit.version>4.11</junit.version>
     <m2eclipse.wtp.contextRoot>calendar-dev</m2eclipse.wtp.contextRoot>
     <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
   </properties>
