@@ -4,17 +4,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.mycompany.myapp.domain.CalendarUser;
@@ -35,16 +40,16 @@ public class JdbcEventDao implements EventDao {
 		public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Event event = new Event();
 			
-			CalendarUser attendee = jcud.getUser(rs.getInt("attendee"));
-			CalendarUser owner = jcud.getUser(rs.getInt("owner"));
+			Calendar when = Calendar.getInstance();
+			when.setTimeInMillis(rs.getTimestamp("when").getTime());
 			
-			event.setAttendee(attendee);
+			event.setAttendee(jcud.getUser(rs.getInt("attendee")));
 			event.setDescription(rs.getString("description"));
-			event.setId(rs.getString("id"));
-			event.setOwner(owner);
+			event.setId(rs.getInt("id"));
+			event.setOwner(jcud.getUser(rs.getInt("owner")));
 			event.setSummary(rs.getString("summary"));
 			event.setWhen(when);
-			return user;
+			return event;
 		}
 	};
 
@@ -56,139 +61,107 @@ public class JdbcEventDao implements EventDao {
 	// --- EventService ---
 	@Override
 	public Event getEvent(int eventId) {
-		ApplicationContext context = new GenericXmlApplicationContext(
-				"com/mycompany/myapp/applicationContext.xml");
-		;
-		CalendarUserDao calendarUserDao = context.getBean("calendarUserDao",
-				JdbcCalendarUserDao.class);
-
-		Event event = new Event();
-
-		Connection c;
-		try {
-			c = dataSource.getConnection();
-
-			PreparedStatement ps = c
-					.prepareStatement("select * from events where id = ?");
-			ps.setString(1, Integer.toString(eventId));
-
-			ResultSet rs = ps.executeQuery();
-			rs.next();
-
-			event.setId(Integer.parseInt(rs.getString("id")));
-
-			Calendar when = Calendar.getInstance();
-			when.setTimeInMillis(rs.getTimestamp("when").getTime());
-			event.setWhen(when);
-			event.setSummary(rs.getString("summary"));
-			event.setDescription(rs.getString("description"));
-			CalendarUser owner = calendarUserDao.getUser(rs.getInt("owner"));
-			event.setOwner(owner);
-			CalendarUser attendee = calendarUserDao.getUser(rs
-					.getInt("attendee"));
-			event.setAttendee(attendee);
-
-			rs.close();
-			ps.close();
-			c.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return event;
+		return this.jdbcTemplate.queryForObject("select * from events where id = ?", new Object[] {eventId}, this.userMapper);
 	}
 
 	@Override
 	public int createEvent(final Event event) {
-		Connection c;
-		int generatedId = 0;
-		try {
-			c = dataSource.getConnection();
+		KeyHolder keyHolder = new GeneratedKeyHolder();
 
-			PreparedStatement ps = c
-					.prepareStatement(
-							"insert into events(`when`, summary, description, owner, attendee) values(?,?,?,?,?)",
-							PreparedStatement.RETURN_GENERATED_KEYS);
-
-			Timestamp timestamp = new Timestamp(event.getWhen()
-					.getTimeInMillis());
-
-			ps.setTimestamp(1, timestamp);
-			ps.setString(2, event.getSummary());
-			ps.setString(3, event.getDescription());
-			ps.setInt(4, event.getOwner().getId());
-			ps.setInt(5, event.getAttendee().getId());
-
-			ps.executeUpdate();
-
-			ResultSet rs = ps.getGeneratedKeys();
-
-			if (rs.next()) {
-				generatedId = rs.getInt(1);
+		this.jdbcTemplate.update(new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(
+					Connection connection) throws SQLException {
+				PreparedStatement ps = connection
+						.prepareStatement(
+								"insert into events(`when`, summary, description, owner, attendee) values(?,?,?,?,?)",
+								Statement.RETURN_GENERATED_KEYS);
+				
+				Timestamp timestamp = new Timestamp(event.getWhen()
+						.getTimeInMillis());
+				
+				ps.setTimestamp(1, timestamp);
+				ps.setString(2, event.getSummary());
+				ps.setString(3, event.getDescription());
+				ps.setInt(4, event.getOwner().getId());
+				ps.setInt(5, event.getAttendee().getId());
+				
+				return ps;
 			}
-			rs.close();
-			ps.close();
-			c.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return generatedId;
+		}, keyHolder);
+		return keyHolder.getKey().intValue();
 	}
 
 	@Override
 	public List<Event> findForOwner(int ownerUserId) {
 		// Assignment 2
-		return null;
+		
+//		ApplicationContext context = new GenericXmlApplicationContext(
+//				"com/mycompany/myapp/applicationContext.xml");
+//		;
+//
+//		CalendarUserDao calendarUserDao = context.getBean("calendarUserDao",
+//				JdbcCalendarUserDao.class);
+		
+		
+		List<Event> events = new ArrayList<Event>();
+
+		String sql;
+
+		if (ownerUserId < 0)
+			sql = "select * from events";
+		else
+			sql = "select * from events where owner like '%" + ownerUserId + "%'";
+
+		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
+
+		for (Map row : rows) {
+			Event event = new Event();
+			
+			Calendar when = Calendar.getInstance();
+			when.setTimeInMillis(((Timestamp)row.get("when")).getTime());
+			
+			event.setAttendee(jcud.getUser(Integer.parseInt(String.valueOf(row.get("attendee")))));
+			event.setDescription(row.get("description").toString());
+			event.setId(Integer.parseInt(String.valueOf(row.get("id"))));
+			event.setOwner(jcud.getUser(Integer.parseInt(String.valueOf(row.get("owner")))));
+			event.setSummary(row.get("summary").toString());
+			event.setWhen(when);
+			events.add(event);
+		}
+		
+		return events;
 	}
 
 	@Override
 	public List<Event> getEvents() {
-		ApplicationContext context = new GenericXmlApplicationContext(
-				"com/mycompany/myapp/applicationContext.xml");
-		;
+		List<Event> events = new ArrayList<Event>();
 
-		CalendarUserDao calendarUserDao = context.getBean("calendarUserDao",
-				JdbcCalendarUserDao.class);
+		String sql = "select * from events";
 
-		List<Event> list = new ArrayList<Event>();
+		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
 
-		Connection c;
-		try {
-			c = dataSource.getConnection();
-
-			PreparedStatement ps = c.prepareStatement("select * from events");
-
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Event event = new Event();
-				event.setId(Integer.parseInt(rs.getString("id")));
-				Calendar when = Calendar.getInstance();
-				when.setTimeInMillis(rs.getTimestamp("when").getTime());
-				event.setWhen(when);
-				event.setSummary(rs.getString("summary"));
-				event.setDescription(rs.getString("description"));
-				CalendarUser owner = calendarUserDao
-						.getUser(rs.getInt("owner"));
-				event.setOwner(owner);
-				CalendarUser attendee = calendarUserDao.getUser(rs
-						.getInt("attendee"));
-				event.setAttendee(attendee);
-
-				list.add(event);
-			}
-			rs.close();
-			ps.close();
-			c.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (Map row : rows) {
+			Event event = new Event();
+			
+			Calendar when = Calendar.getInstance();
+			when.setTimeInMillis(((Timestamp)row.get("when")).getTime());
+			
+			event.setAttendee(jcud.getUser(Integer.parseInt(String.valueOf(row.get("attendee")))));
+			event.setDescription(row.get("description").toString());
+			event.setId(Integer.parseInt(String.valueOf(row.get("id"))));
+			event.setOwner(jcud.getUser(Integer.parseInt(String.valueOf(row.get("owner")))));
+			event.setSummary(row.get("summary").toString());
+			event.setWhen(when);
+			events.add(event);
 		}
-		return list;
+		
+		return events;
 	}
 
 	@Override
 	public void deleteAll() {
 		// Assignment 2
+		this.jdbcTemplate.update("delete from events");
 	}
 }
