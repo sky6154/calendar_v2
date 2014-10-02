@@ -65,9 +65,9 @@ public class DaoJUnitTest {
 		calendarUsers[1].setName("User2");
 		calendarUsers[1].setPassword("user2");
 		
-		calendarUsers[1].setEmail("user3@example.com");
-		calendarUsers[1].setName("User3");
-		calendarUsers[1].setPassword("user3");
+		calendarUsers[2].setEmail("user3@example.com");
+		calendarUsers[2].setName("User3");
+		calendarUsers[2].setPassword("user3");
 		
 		int id1 = this.calendarUserDao.createUser(calendarUsers[0]);
 		int id2 = this.calendarUserDao.createUser(calendarUsers[1]);
