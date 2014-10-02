@@ -1,22 +1,21 @@
 package com.mycompany.myapp.dao;
 
-import java.util.Calendar;
-import java.util.List;
-
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-
-import com.mycompany.myapp.domain.CalendarUser;
-import com.mycompany.myapp.domain.Event;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.mycompany.myapp.domain.CalendarUser;
+import com.mycompany.myapp.domain.Event;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="../applicationContext.xml")
@@ -30,6 +29,10 @@ public class DaoJUnitTest {
 	
 	private CalendarUser[] calendarUsers = null;
 	private Event[] events = null;
+	
+	int id1;
+	int id2;
+	int id3;
 	
 	@Before
 	public void setUp() {
@@ -57,31 +60,46 @@ public class DaoJUnitTest {
 //		insert into calendar_users(`id`,`email`,`password`,`name`) values (1,'user1@example.com','user1','User1');
 //		insert into calendar_users(`id`,`email`,`password`,`name`) values (2,'admin1@example.com','admin1','Admin');
 //		insert into calendar_users(`id`,`email`,`password`,`name`) values (3,'user2@example.com','user2','User1');
+		
+		// 초기화
+		calendarUsers[0] = new CalendarUser();
+		calendarUsers[1] = new CalendarUser();
+		calendarUsers[2] = new CalendarUser();
+		
+		events[0] = new Event();
+		events[1] = new Event();
+		events[2] = new Event();	
+		
+		// CalendarUser 생성
+		
 		calendarUsers[0].setEmail("user1@example.com");
 		calendarUsers[0].setName("User1");
 		calendarUsers[0].setPassword("user1");
 		
-		calendarUsers[1].setEmail("user2@example.com");
-		calendarUsers[1].setName("User2");
-		calendarUsers[1].setPassword("user2");
+		calendarUsers[1].setEmail("admin1@example.com");
+		calendarUsers[1].setName("Admin");
+		calendarUsers[1].setPassword("admin1");
 		
 		calendarUsers[2].setEmail("user3@example.com");
 		calendarUsers[2].setName("User3");
 		calendarUsers[2].setPassword("user3");
 		
-		int id1 = this.calendarUserDao.createUser(calendarUsers[0]);
-		int id2 = this.calendarUserDao.createUser(calendarUsers[1]);
-		int id3 = this.calendarUserDao.createUser(calendarUsers[2]);
-		
+		// 반환받은 id
+		id1 = this.calendarUserDao.createUser(calendarUsers[0]);
+		id2 = this.calendarUserDao.createUser(calendarUsers[1]);
+		id3 = this.calendarUserDao.createUser(calendarUsers[2]);
 		
 //		insert into events (`id`,`when`,`summary`,`description`,`owner`,`attendee`) values (100,'2013-10-04 20:30:00','Birthday Party','This is going to be a great birthday',1,2);
 //		insert into events (`id`,`when`,`summary`,`description`,`owner`,`attendee`) values (101,'2013-12-23 13:00:00','Conference Call','Call with the client',3,1);
 //		insert into events (`id`,`when`,`summary`,`description`,`owner`,`attendee`) values (102,'2014-01-23 11:30:00','Lunch','Eating lunch together',2,3);
 
 		
+		// MONTH를 DB에 입력 시 한달이 증가되어 입력됩니다.
+		// date1.set(Calendar.MONTH, 10); 으로 할 경우 11월이 입력됨.
+		// 배열과 비슷하게 0부터 시작하는 것 같습니다.
 		Calendar date1 = Calendar.getInstance();
 		date1.set(Calendar.YEAR, 2013);
-		date1.set(Calendar.MONTH, 10);
+		date1.set(Calendar.MONTH, Calendar.OCTOBER);
 		date1.set(Calendar.DAY_OF_MONTH, 4);
 		date1.set(Calendar.HOUR_OF_DAY, 20);
 		date1.set(Calendar.MINUTE, 30);
@@ -89,7 +107,7 @@ public class DaoJUnitTest {
 		
 		Calendar date2 = Calendar.getInstance();
 		date2.set(Calendar.YEAR, 2013);
-		date2.set(Calendar.MONTH, 12);
+		date2.set(Calendar.MONTH, Calendar.DECEMBER);
 		date2.set(Calendar.DAY_OF_MONTH, 23);
 		date2.set(Calendar.HOUR_OF_DAY, 13);
 		date2.set(Calendar.MINUTE, 0);
@@ -97,12 +115,11 @@ public class DaoJUnitTest {
 		
 		Calendar date3 = Calendar.getInstance();
 		date3.set(Calendar.YEAR, 2014);
-		date3.set(Calendar.MONTH, 1);
+		date3.set(Calendar.MONTH, Calendar.JANUARY);
 		date3.set(Calendar.DAY_OF_MONTH, 23);
 		date3.set(Calendar.HOUR_OF_DAY, 11);
 		date3.set(Calendar.MINUTE, 30);
 		date3.set(Calendar.SECOND, 0);
-		
 		
 		events[0].setAttendee(calendarUserDao.getUser(id2));
 		events[0].setDescription("This is going to be a great birthday");
@@ -121,6 +138,11 @@ public class DaoJUnitTest {
 		events[2].setOwner(calendarUserDao.getUser(id2));
 		events[2].setSummary("Lunch");
 		events[2].setWhen(date3);
+		
+		
+		this.eventDao.createEvent(events[0]);
+		this.eventDao.createEvent(events[1]);
+		this.eventDao.createEvent(events[2]);
 	}
 	
 	@Test
@@ -140,12 +162,11 @@ public class DaoJUnitTest {
 		createUser2.setPassword("createUser2");
 		createUser2.setName("createUser2");
 		
+		// 생성된 id
 		createUser1Id = calendarUserDao.createUser(createUser1);
 		createUser2Id = calendarUserDao.createUser(createUser2);
 		
-		System.out.println("createUser1 Id: " + createUser1Id);
-		System.out.println("createUser2 Id: " + createUser2Id);
-		
+		// 비교할 객체
 		CalendarUser compareUser1 = calendarUserDao.getUser(createUser1Id);
 		CalendarUser compareUser2 = calendarUserDao.getUser(createUser2Id);
 		
@@ -173,20 +194,18 @@ public class DaoJUnitTest {
 		createEvent1.setWhen(Calendar.getInstance());
 		createEvent1.setSummary("event1 - summary");
 		createEvent1.setDescription("event1 - description");
-		createEvent1.setOwner(calendarUserDao.getUser(1));
-		createEvent1.setAttendee(calendarUserDao.getUser(2));
+		createEvent1.setOwner(calendarUserDao.getUser(id1));
+		createEvent1.setAttendee(calendarUserDao.getUser(id2));
 		
 		createEvent2.setWhen(Calendar.getInstance());
 		createEvent2.setSummary("event2 - summary");
 		createEvent2.setDescription("event2 - description");
-		createEvent2.setOwner(calendarUserDao.getUser(3));
-		createEvent2.setAttendee(calendarUserDao.getUser(1));
+		createEvent2.setOwner(calendarUserDao.getUser(id3));
+		createEvent2.setAttendee(calendarUserDao.getUser(id1));
 		
+		// 생성된 id
 		createEvent1Id = eventDao.createEvent(createEvent1);
 		createEvent2Id = eventDao.createEvent(createEvent2);
-		
-		System.out.println("createEvent1 Id: " + createEvent1Id);
-		System.out.println("createEvent2 Id: " + createEvent2Id);
 		
 		Event compareEvent1 = eventDao.getEvent(createEvent1Id);
 		Event compareEvent2 = eventDao.getEvent(createEvent2Id);
@@ -195,6 +214,11 @@ public class DaoJUnitTest {
 		assertThat(createEvent1.getDescription(), is(compareEvent1.getDescription()));
 		assertThat(createEvent1.getOwner(), is(compareEvent1.getOwner()));
 		assertThat(createEvent1.getSummary(), is(compareEvent1.getSummary()));
+		
+		assertThat(createEvent2.getAttendee(), is(compareEvent2.getAttendee()));
+		assertThat(createEvent2.getDescription(), is(compareEvent2.getDescription()));
+		assertThat(createEvent2.getOwner(), is(compareEvent2.getOwner()));
+		assertThat(createEvent2.getSummary(), is(compareEvent2.getSummary()));
 	}
 	
 	@Test
@@ -203,6 +227,7 @@ public class DaoJUnitTest {
 		// [주의] fixture로 등록된 3개의 이벤트들에 대한 테스트
 		List<Event> eList = eventDao.getEvents();
 		
+		// 결과가 3개이면 참
 		assertThat(eList.size(), is(3));
 	}
 	
@@ -211,9 +236,13 @@ public class DaoJUnitTest {
 		// 5. owner ID가 3인 Event에 대해 findForOwner가 올바로 동작하는 지 확인하는 테스트 코드 작성  
 		// [주의] fixture로 등록된 3개의 이벤트들에 대해서 owner ID가 3인 것인 1개의 이벤트뿐임 
 		
-		List<Event> testEvent = eventDao.findForOwner(3);
+		// AutoIncrement로 인해 deleteAll로 지워도 그 값은 다시 1부터 시작하는게 아니라 이어서 증가하기때문에 3이 아닌
+		// 애초에 생성한 id를 주었습니다.
 		
-		assertThat(testEvent.get(0).getOwner().getId(), is(3));
+		List<Event> testEvent = eventDao.findForOwner(id3);
+		
+		// 값이 있고 ID가 같으면 참
+		assertThat(testEvent.get(0).getOwner().getId(), is(id3));
 	}
 	
 	@Test
@@ -223,6 +252,7 @@ public class DaoJUnitTest {
 		
 		CalendarUser test6 = calendarUserDao.findUserByEmail("user1@example.com");
 		
+		// null이 아니면 참
 		assertTrue(test6 != null);
 	}
 	
@@ -233,6 +263,7 @@ public class DaoJUnitTest {
 		
 		List<CalendarUser> cList = calendarUserDao.findUsersByEmail("user");
 		
+		// 2개일경우 참
 		assertThat(cList.size(), is(2));
 	}
 }

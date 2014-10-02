@@ -13,8 +13,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,20 +20,26 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import com.mycompany.myapp.domain.CalendarUser;
 import com.mycompany.myapp.domain.Event;
 
 @Repository
 public class JdbcEventDao implements EventDao {
 	private JdbcTemplate jdbcTemplate;
+	
+	// CalendarUser호출을 위한 객체
+	// 코드의 재사용을 줄여보기 위해 사용하였습니다.
+	// 이 class에 쿼리문을 또 작성한다면 쿼리문 변경시에 두개의 쿼리문을 변경해야 할 것 같았습니다.
 	private JdbcCalendarUserDao jcud;
 	
 
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		
+		// 초기화
 		jcud.setDataSource(dataSource);
 	}
 
+	// 유저를 DB에서 얻어올때 사용할 Mapper객체
 	private RowMapper<Event> userMapper = new RowMapper<Event>() {
 		public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Event event = new Event();
@@ -55,6 +59,7 @@ public class JdbcEventDao implements EventDao {
 
 	// --- constructors ---
 	public JdbcEventDao() {
+		// 생성과 동시에 초기화
 		this.jcud = new JdbcCalendarUserDao();
 	}
 
@@ -66,6 +71,7 @@ public class JdbcEventDao implements EventDao {
 
 	@Override
 	public int createEvent(final Event event) {
+		// Auto Increment되는 id를 받아오기 위한 객체
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
 		this.jdbcTemplate.update(new PreparedStatementCreator() {
@@ -108,6 +114,7 @@ public class JdbcEventDao implements EventDao {
 
 		String sql;
 
+		// -1 이하의 값이 들어올 경우 모든 event를 가져오도록 하였습니다.
 		if (ownerUserId < 0)
 			sql = "select * from events";
 		else
@@ -115,6 +122,7 @@ public class JdbcEventDao implements EventDao {
 
 		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
 
+		// Event들을 받아옵니다.
 		for (Map row : rows) {
 			Event event = new Event();
 			
@@ -141,6 +149,7 @@ public class JdbcEventDao implements EventDao {
 
 		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
 
+		// Event들을 받아옵니다.
 		for (Map row : rows) {
 			Event event = new Event();
 			

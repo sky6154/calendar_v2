@@ -28,6 +28,7 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+	// CalendarUser를 결과와 매핑해줄 Mapper
 	private RowMapper<CalendarUser> userMapper = new RowMapper<CalendarUser>() {
 		public CalendarUser mapRow(ResultSet rs, int rowNum) throws SQLException {
 			CalendarUser user = new CalendarUser();
@@ -60,6 +61,7 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 		
 		String sql;
 		
+		// null일경우 전체를 반환합니다.
 		if(email == null)
 			sql = "select * from calendar_users";
 		else
@@ -67,7 +69,7 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 		
 		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
 		
-		
+		// 결과에 부합하는 CalendarUser들을 받아옵니다.
 		for(Map row : rows){
 			CalendarUser cu = new CalendarUser();
 			cu.setId(Integer.parseInt(String.valueOf(row.get("id"))));
@@ -83,6 +85,7 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 
 	@Override
 	public int createUser(final CalendarUser userToAdd){
+		// 자동으로 증가된 id값을 받아오기 위해 사용합니다.
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		
 		this.jdbcTemplate.update(new PreparedStatementCreator() {
@@ -95,6 +98,8 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 				return ps;
 			}
 		}, keyHolder);
+		
+		// 받아온 id를 반환합니다.
 		return keyHolder.getKey().intValue();
 	}
 	
