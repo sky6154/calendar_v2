@@ -111,7 +111,7 @@ public class JdbcEventDao implements EventDao {
 		if (ownerUserId < 0)
 			sql = "select * from events";
 		else
-			sql = "select * from events where owner like '%" + ownerUserId + "%'";
+			sql = "select * from events where owner = " + ownerUserId;
 
 		List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
 

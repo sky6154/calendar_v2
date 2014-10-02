@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.mycompany.myapp</groupId>
-  <artifactId>calendar-dev</artifactId>
+  <artifactId>calendar_v2</artifactId>
   <version>1.0</version>
   <packaging>war</packaging>
   <licenses>
@@ -215,12 +215,14 @@
 		<version>${spring.version}</version>
 		<scope>test</scope>
 	</dependency>
+	
 	<dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
 		<version>${junit.version}</version>
 		<scope>test</scope>
 	</dependency>
+	
   </dependencies>
   <properties>
     <spring.version>3.1.0.RELEASE</spring.version>
